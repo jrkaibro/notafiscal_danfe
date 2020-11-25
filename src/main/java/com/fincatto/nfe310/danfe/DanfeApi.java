@@ -9,7 +9,43 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.io.*;
 
 public class DanfeApi {
-    public String gerarPDFxml(String xml, String urlLogo, String directoryToSave, String fileName) {
+    public String gerarPDFxmlNF(String xml, String urlLogo, String directoryToSave, String fileName) {
+        String returnValue;
+        String directory = directoryValidate(directoryToSave, fileName);
+        try {
+            File verifyDirectory = new File(directory);
+            if (verifyDirectory.exists()) {
+                NFDanfeReport danfe = new NFDanfeReport(xml);
+                JasperPrint jasper;
+                RandomAccessFile f;
+                File verifyImage = new File(urlLogo);
+                byte[] logo = null;
+
+                if (verifyImage.exists()) {
+                    f = new RandomAccessFile(urlLogo, "r");
+                    logo = new byte[(int) f.length()];
+                    f.read(logo);
+                    f.close();
+                } else {
+                    System.out.println("Logo não encontrada");
+                }
+                try {
+                    jasper = danfe.createJasperPrintNFe(logo);
+                    JasperExportManager.exportReportToPdfFile(jasper, directory);
+                    returnValue = directory;
+                } catch (IOException | ParserConfigurationException | SAXException | JRException e) {
+                    returnValue = "Error: " + e.getMessage() + "cause: " + e.getCause();
+                }
+            } else {
+                returnValue = "Diretório inexistente";
+            }
+        } catch (Exception e) {
+            returnValue = "Diretório inexistente 1";
+        }
+        return returnValue;
+    }
+
+    public String gerarPDFxmlCTe(String xml, String urlLogo, String directoryToSave, String fileName){
         String returnValue;
         String directory = directoryValidate(directoryToSave, fileName);
         try {
@@ -65,4 +101,3 @@ public class DanfeApi {
         return directory;
     }
 }
-
